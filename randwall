@@ -1,0 +1,77 @@
+#!/bin/env bash
+
+# Check command line
+if [[ "$1" == "" ]]; then
+  echo "Usage: $0 <wallpaper path>"
+  echo "Where <wallpaper path> is the path to the wallpapers."
+  exit 1
+fi
+
+# Set wallpaper path
+export WALLPATH="$1"
+
+# Get the number of files in path
+export NUMFILES=$(ls -1 $WALLPATH/*.{JPEG,JPG,PNG,jpeg,jpg,png} | wc -l)
+
+# Bail out if no wallpapers are available
+if [[ $NUMFILES == 0 ]]; then
+  echo "No wallpapers found in $WALLPATH"
+  exit 1
+fi
+
+# Get last wallpaper used in this path
+if [[ -f "$WALLPATH/.wpno" ]]; then
+  export OLDNO=$(cat $WALLPATH/.wpno)
+else
+  export OLDNO=0
+fi
+
+# Get new wallpaper
+export NEWNO=$(shuf -i 1-$NUMFILES -n 1)
+while [ $NEWNO -eq $OLDNO ]; do
+  export NEWNO=$(shuf -i 1-$NUMFILES -n 1)
+done
+export PAPER=""
+export FILES=$(ls -1 $WALLPATH/*.{JPEG,JPG,PNG,jpeg,jpg,png})
+export ITER=1
+for FILE in $FILES; do
+  if [ $ITER -eq $NEWNO ]; then
+    export PAPER=$FILE
+  fi
+  ITER=$(($ITER+1))
+done
+
+# If wallpaper filename is blank, bail out
+if [[ "$PAPER" == "" ]]; then
+  echo "Paper was blank. Something went wrong."
+  echo "WALLPATH: $WALLPATH"
+  echo "OLDNO: $OLDNO"
+  echo "NEWNO: $NEWNO"
+  exit 1
+fi
+
+echo $NEWNO > $WALLPATH/.wpno
+
+# Get aspect ratio of chosen image
+export WIDTH=$(identify -format "%w" "$PAPER")
+export HEIGHT=$(identify -format "%h" "$PAPER")
+export RATIO=$(echo "$WIDTH / $HEIGHT" | bc -l)
+
+# If aspect ratio is > 2.1 or less than 1.3, use scaled, else zoom
+if [[ $(echo "$RATIO > 2.1" | bc -l) -eq 1 || $(echo "$RATIO < 1.3" | bc -l) -eq 1 ]]; then
+  gsettings set org.gnome.desktop.background picture-options 'scaled'
+else
+  gsettings set org.gnome.desktop.background picture-options 'zoom'
+fi
+
+# Find out if using dark mode
+export MODE=$(gsettings get org.gnome.desktop.interface color-scheme)
+
+# Set the wallpaper
+if [[ "$MODE" == "'prefer-dark'" ]]; then
+  gsettings set org.gnome.desktop.background picture-uri-dark file://$PAPER
+else
+  gsettings set org.gnome.desktop.background picture-uri file://$PAPER
+fi
+
+echo "Wallpaper set to $PAPER"
