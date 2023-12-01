@@ -1,0 +1,10 @@
+#!/bin/env bash
+# fixnames - Replace spaces in file names with underscores
+
+# set -euo pipefail
+IFS=$'\n\t'
+
+for f in $(ls -1 ./*\ *.*); do
+  echo "$f"
+  mv "$f" $(echo "$f" | sed 's/ /_/g')
+done
