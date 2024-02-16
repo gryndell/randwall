@@ -31,12 +31,13 @@ export NEWNO=$(shuf -i 1-$NUMFILES -n 1)
 while [ $NEWNO -eq $OLDNO ]; do
   export NEWNO=$(shuf -i 1-$NUMFILES -n 1)
 done
+
 export PAPER=""
 export FILES=$(ls -1 $WALLPATH/*.{JPEG,JPG,PNG,SVG,WEBP,jpeg,jpg,png,svg,webp})
 export ITER=1
 for FILE in $FILES; do
   if [ $ITER -eq $NEWNO ]; then
-    export PAPER=$FILE
+    export PAPER="$FILE"
   fi
   ITER=$(($ITER+1))
 done
@@ -66,9 +67,9 @@ fi
 # If square, use stretch or tiling
 if [[ $(echo "$WIDTH == $HEIGHT" | bc -l) -eq 1 ]]; then
   if [[ $WIDTH -lt 1920 ]]; then
-    gsettings set org.gnome.desktop.background picture-options 'stretch'
-  else
     gsettings set org.gnome.desktop.background picture-options 'wallpaper'
+  else
+    gsettings set org.gnome.desktop.background picture-options 'stretch'
   fi
 fi
 
@@ -82,4 +83,4 @@ else
   gsettings set org.gnome.desktop.background picture-uri file://$PAPER
 fi
 
-echo "Wallpaper set to $PAPER"
+echo "Wallpaper set to \"$PAPER\""
