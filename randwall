@@ -1,9 +1,16 @@
 #!/bin/env bash
 
+# Colors
+RCOL='\e[0m'
+RED='\e[0;31m'
+GRE='\e[0;32m'
+YEL='\e[1;33m'
+BLU='\e[1;34m'
+
 # Check command line
-if [[ "$1" == "" ]]; then
-  echo "Usage: $0 <wallpaper path>"
-  echo "Where <wallpaper path> is the path to the wallpapers."
+if (( $# < 1 )); then
+  echo -e "${RED}Usage: $0 <wallpaper path>${RCOL}" >&2
+  echo -e "${RED}Where <wallpaper path> is the path to the wallpapers.${RCOL}" >&2
   exit 1
 fi
 
@@ -11,11 +18,11 @@ fi
 export WALLPATH="$1"
 
 # Get the number of files in path
-export NUMFILES=$(ls -1 $WALLPATH/*.{JPEG,JPG,PNG,SVG,WEBP,jpeg,jpg,png,svg,webp} | wc -l)
+export NUMFILES=$(find $WALLPATH -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' | wc -l)
 
 # Bail out if no wallpapers are available
 if [[ $NUMFILES == 0 ]]; then
-  echo "No wallpapers found in $WALLPATH"
+  echo -e "${RED}No wallpapers found in $WALLPATH${RCOL}" >&2
   exit 1
 fi
 
@@ -33,7 +40,7 @@ while [ $NEWNO -eq $OLDNO ]; do
 done
 
 export PAPER=""
-export FILES=$(ls -1 $WALLPATH/*.{JPEG,JPG,PNG,SVG,WEBP,jpeg,jpg,png,svg,webp})
+export FILES=$(find $WALLPATH -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)')
 export ITER=1
 for FILE in $FILES; do
   if [ $ITER -eq $NEWNO ]; then
@@ -44,10 +51,10 @@ done
 
 # If wallpaper filename is blank, bail out
 if [[ "$PAPER" == "" ]]; then
-  echo "Paper was blank. Something went wrong."
-  echo "WALLPATH: $WALLPATH"
-  echo "OLDNO: $OLDNO"
-  echo "NEWNO: $NEWNO"
+  echo -e "${RED}Paper was blank. Something went wrong.${RCOL}" >&2
+  echo -e "${RED}WALLPATH: $WALLPATH${RCOL}" >&2
+  echo -e "${RED}OLDNO: $OLDNO${RCOL}" >&2
+  echo -e "${RED}NEWNO: $NEWNO${RCOL}" >&2
   exit 1
 fi
 
@@ -83,4 +90,4 @@ else
   gsettings set org.gnome.desktop.background picture-uri file://$PAPER
 fi
 
-echo "Wallpaper set to \"$PAPER\""
+echo -e "${GRE}Wallpaper set to \"$PAPER\"${RCOL}"
