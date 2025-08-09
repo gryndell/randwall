@@ -18,7 +18,7 @@ fi
 export WALLPATH="$1"
 
 # Get the number of files in path
-export NUMFILES=$(find $WALLPATH -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' | wc -l)
+export NUMFILES=$(find $WALLPATH -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null | wc -l)
 
 # Bail out if no wallpapers are available
 if [[ $NUMFILES == 0 ]]; then
@@ -28,19 +28,22 @@ fi
 
 # Get last wallpaper used in this path
 if [[ -f "$WALLPATH/.wpno" ]]; then
-  export OLDNO=$(cat $WALLPATH/.wpno)
+  export OLDNO=$(cat $WALLPATH/.wpno 2>/dev/null)
+  if [[ $OLDNO == "" ]]; then
+    export OLDNO=0
+  fi
 else
   export OLDNO=0
 fi
 
 # Get new wallpaper
-export NEWNO=$(shuf -i 1-$NUMFILES -n 1)
+export NEWNO=$(shuf -i 1-$NUMFILES -n 1 2>/dev/null)
 while [ $NEWNO -eq $OLDNO ]; do
-  export NEWNO=$(shuf -i 1-$NUMFILES -n 1)
+  export NEWNO=$(shuf -i 1-$NUMFILES -n 1 2>/dev/null)
 done
 
 export PAPER=""
-export FILES=$(find $WALLPATH -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)')
+export FILES=$(find $WALLPATH -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null)
 export ITER=1
 for FILE in $FILES; do
   if [ $ITER -eq $NEWNO ]; then
@@ -91,3 +94,4 @@ else
 fi
 
 echo -e "${GRE}Wallpaper set to \"$PAPER\"${RCOL}"
+
