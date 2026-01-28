@@ -1,5 +1,5 @@
 #!/bin/env bash
-
+# set -x
 # Colors
 creset='\e[0m'
 red='\e[0;31m'
@@ -42,7 +42,7 @@ done
 
 paper=""
 iter=1
-for file in ${wallpath}/*.{JPEG,JPG,PNG,SVG,WEBP,jpeg,jpg,png,svg,webp}; do
+for file in $(find $wallpath -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null); do
   if (( iter == newno )); then
     paper="$file"
   fi
