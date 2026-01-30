@@ -1,9 +1,8 @@
 #!/bin/env bash
-# set -x
+
 # Colors
 creset='\e[0m'
 red='\e[0;31m'
-green='\e[0;32m'
 
 # Check command line
 if (( $# < 1 )); then
@@ -16,7 +15,7 @@ fi
 wallpath="$1"
 
 # Get the number of files in path
-numfiles=$(find $wallpath -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null | wc -l)
+numfiles=$(find "$wallpath" -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null | wc -l)
 
 # Bail out if no wallpapers are available
 if (( numfiles == 0 )); then
@@ -26,7 +25,7 @@ fi
 
 # Get last wallpaper used in this path
 if [[ -f "$wallpath/.wpno" ]]; then
-  oldno=$(cat ${wallpath}/.wpno 2>/dev/null)
+  oldno=$(cat "$wallpath"/.wpno 2>/dev/null)
   if [[ $oldno == "" ]]; then
     oldno=0
   fi
@@ -37,17 +36,18 @@ fi
 # Get new wallpaper
 newno="$oldno"
 while (( newno == oldno )); do
-  newno=$(shuf -i 1-$numfiles -n 1 2>/dev/null)
+  newno=$(shuf -i 1-"$numfiles" -n 1 2>/dev/null)
 done
 
 paper=""
 iter=1
-for file in $(find $wallpath -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null); do
+while IFS= read -r file; do
   if (( iter == newno )); then
     paper="$file"
+    break
   fi
   (( iter++ ))
-done
+done < <(find "$wallpath" -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null)
 
 # If wallpaper filename is blank, bail out
 if [[ "$paper" == "" ]]; then
@@ -90,12 +90,11 @@ mode=$(gsettings get org.gnome.desktop.interface color-scheme)
 
 # Set the wallpaper
 if [[ "$mode" == "'prefer-dark'" ]]; then
-  gsettings set org.gnome.desktop.background picture-uri-dark file://$paper
+  gsettings set org.gnome.desktop.background picture-uri-dark file://"$paper"
 else
-  gsettings set org.gnome.desktop.background picture-uri file://$paper
+  gsettings set org.gnome.desktop.background picture-uri file://"$paper"
 fi
 
-# echo -e "${green}Wallpaper set to \"$paper\"${creset} in $mode mode"
 if [[ "$mode" == "'prefer-dark'" ]]; then
   mode="dark"
 else
