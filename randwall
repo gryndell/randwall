@@ -11,8 +11,16 @@ if (( $# < 1 )); then
   exit 1
 fi
 
+# Initialize random_or_cycle variable
+random_or_cycle="random"
+
 # Set wallpaper path
 wallpath="$1"
+
+# Determine whether to cycle or randomise
+if [[ "$2" == "cycle" ]]; then
+  random_or_cycle="cycle"
+fi
 
 # Get the number of files in path
 numfiles=$(find "$wallpath" -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null | wc -l)
@@ -36,8 +44,15 @@ fi
 # Get new wallpaper
 newno="$oldno"
 while (( newno == oldno )); do
-  newno=$(shuf -i 1-"$numfiles" -n 1 2>/dev/null)
+  if [[ "$random_or_cycle" == "cycle" ]]; then
+    newno=$(echo "$newno + 1" | bc)
+  else
+    newno=$(shuf -i 1-"$numfiles" -n 1 2>/dev/null)
+  fi
 done
+if (( newno > numfiles )); then
+  newno=1
+fi
 
 paper=""
 iter=1
