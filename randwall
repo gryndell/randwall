@@ -23,7 +23,7 @@ if [[ "$2" == "cycle" ]]; then
 fi
 
 # Get the number of files in path
-numfiles=$(find "$wallpath" -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null | wc -l)
+numfiles=$(ls -1 "${wallpath}"/*.{JPEG,JPG,PNG,SVG,WEBP,jpeg,jpg,png,svg,webp} 2>/dev/null | wc -l)
 
 # Bail out if no wallpapers are available
 if (( numfiles == 0 )); then
@@ -62,7 +62,7 @@ while IFS= read -r file; do
     break
   fi
   (( iter++ ))
-done < <(find "$wallpath" -type f -regex '.*\.\(JPEG\|JPG\|PNG\|SVG\|WEBP\|jpeg\|jpg\|png\|svg\|webp\)' 2>/dev/null)
+done < <(ls -1 "${wallpath}"/*.{JPEG,JPG,PNG,SVG,WEBP,jpeg,jpg,png,svg,webp} 2>/dev/null)
 
 # If wallpaper filename is blank, bail out
 if [[ "$paper" == "" ]]; then
