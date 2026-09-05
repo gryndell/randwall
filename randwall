@@ -33,7 +33,7 @@ fi
 
 # Get last wallpaper used in this path
 if [[ -f "$wallpath/.wpno" ]]; then
-  oldno=$(cat "$wallpath"/.wpno 2>/dev/null)
+  read -r oldno < "$wallpath"/.wpno 2>/dev/null
   if [[ $oldno == "" ]]; then
     oldno=0
   fi
